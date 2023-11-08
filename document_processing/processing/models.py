@@ -69,9 +69,9 @@ class ModelLoader:
 
         model = ClassificationModel(
             model_type= self.json_file['Type'],
-            preprocessing=preprocessings[0], #TODO multi input
+            preprocessing=preprocessings[0],
             model_inference=model_inference,
-            postprocessing=postprocessings[0], #TODO Multi output
+            postprocessing=postprocessings[0],
         )
 
         return model
@@ -104,9 +104,9 @@ class ModelLoader:
 
         model = ClassificationModel(
             model_type=self.json_file['Type'],
-            preprocessing=preprocessings[0],  # TODO multi input
+            preprocessing=preprocessings[0],
             model_inference=model_inference,
-            postprocessing=postprocessings[0],  # TODO Multi output
+            postprocessing=postprocessings[0],
         )
 
         return model
@@ -167,9 +167,9 @@ class ModelLoader:
 
         model = ClassificationModel(
             model_type=self.json_file['Type'],
-            preprocessing=preprocessings[0],  # TODO multi input
+            preprocessing=preprocessings[0],
             model_inference=model_inference,
-            postprocessing=postprocessings[0],  # TODO Multi output
+            postprocessing=postprocessings[0],
         )
 
         return model
@@ -203,9 +203,9 @@ class ModelLoader:
 
         model = YoloDetectorModel(
             model_type=self.json_file['Type'],
-            preprocessing=preprocessings[0],  # TODO multi input
+            preprocessing=preprocessings[0],
             model_inference=model_inference,
-            postprocessing=postprocessings[0],  # TODO Multi output
+            postprocessing=postprocessings[0],
         )
 
         return model
@@ -240,7 +240,7 @@ class ModelLoader:
 
         model = YoloSegmentorModel(
             model_type=self.json_file['Type'],
-            preprocessing=preprocessings[0],  # TODO multi input
+            preprocessing=preprocessings[0],
             model_inference=model_inference,
             postprocessing=postprocessings,
         )

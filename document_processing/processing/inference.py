@@ -9,7 +9,6 @@ class ModelInference:
     '''
     Class that makes different types of inference. On initialization, according to type of model it sets prediction
     '''
-    #TODO Make multiple inputs and batching
     def __init__(self,
                  model_path: Path,
                  device: str = 'gpu',
