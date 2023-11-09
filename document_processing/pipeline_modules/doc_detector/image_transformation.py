@@ -130,6 +130,8 @@ def fix_perspective(img: np.ndarray, segments: np.ndarray, ):
         if approx.shape[0] !=4: #if we fail to find 4 points then just skip
             continue
 
+        approx[:, 0] = np.where(approx[:, 0] > img.shape[1], img.shape[1], approx[:, 0])
+        approx[:, 1] = np.where(approx[:, 1] > img.shape[0], img.shape[0], approx[:, 1])
 
         top_left = [0, 0]
         bottom_right = approx.max(axis=0) - approx.min(axis=0)
