@@ -40,7 +40,7 @@ def main():
     params = vars(args)
 
     pipeline = Pipeline(model_format=params['format'], device=params['device'], )
-    pipeline(params['img_path'], check_quality=params['check_q'], img_size=params['img_size'])
+    pipeline(params['img_path'], check_quality=params['check_quality'], img_size=params['img_size'])
 
     params['pipeline'] = pipeline
     process_img(**params)
