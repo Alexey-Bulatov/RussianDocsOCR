@@ -1,8 +1,8 @@
-coremltools==7.1
+coremltools==7.0
 matplotlib==3.8.0
 numpy==1.26.1
 onnxruntime-gpu==1.16.1
-opencv-contrib-python
+opencv-contrib-python==4.8.1.78
 pandas==2.1.2
 Pillow==10.1.0
 py_cpuinfo==9.0.0

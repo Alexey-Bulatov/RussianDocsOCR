@@ -6,7 +6,7 @@ import pprint
 import argparse
 
 
-def process_img(**kwargs):
+def process_img(**kwargs) -> dict:
     """Process 1 image"""
 
     assert kwargs.get('img_path') is not None, "Missing path to image"
@@ -14,10 +14,12 @@ def process_img(**kwargs):
     img_size = kwargs.get('img_size')
     check_q = kwargs.get('check_quality')
 
-    pipeline = Pipeline(model_format=kwargs['format'], device=kwargs['device'])
+    pipeline = kwargs.get('pipeline')
+
     result = pipeline(img_path, check_quality=check_q, img_size=img_size)
     pp = pprint.PrettyPrinter(depth=4, indent=4)
     pp.pprint(result.full_report)
+    return result
 
 
 def main():
@@ -34,6 +36,11 @@ def main():
     parser.add_argument('--img_size', help='To which max size reshape image', required=False, default=1500, type=int)
     args = parser.parse_args()
     params = vars(args)
+
+    pipeline = Pipeline(model_format=params['format'], device=params['device'], )
+    pipeline(params['img_path'], check_quality=params['check_quality'], img_size=params['img_size'])
+
+    params['pipeline'] = pipeline
     process_img(**params)
 
 
