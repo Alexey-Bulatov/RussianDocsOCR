@@ -34,13 +34,13 @@ class TestOCRRus:
 
     def test_rus_sex(self):
         ocr = ocr_rus.OCRRus()
-        assert ocr.fix_errors('Sex_ru', 'муж') == 'МУЖ'
-        assert ocr.fix_errors('Sex_ru', 'жен.') == 'ЖЕН.'
-        assert ocr.fix_errors('Sex_ru', '.муж.') == 'МУЖ.'
-        assert ocr.fix_errors('Sex_ru', '..муж..') == 'МУЖ.'
+        assert ocr.fix_errors('Sex_ru', 'муж') == 'М'
+        assert ocr.fix_errors('Sex_ru', 'жен.') == 'Ж'
+        assert ocr.fix_errors('Sex_ru', '.муж.') == 'М'
+        assert ocr.fix_errors('Sex_ru', '..муж..') == 'М'
         assert ocr.fix_errors('Sex_ru', 'м') == 'М'
         assert ocr.fix_errors('Sex_ru', 'ж') == 'Ж'
         assert ocr.fix_errors('Sex_ru', 'ма') == 'М'
         assert ocr.fix_errors('Sex_ru', 'жа') == 'Ж'
-        assert ocr.fix_errors('Sex_ru', 'муш') == 'МУЖ'
-        assert ocr.fix_errors('Sex_ru', '.шен.') == 'ЖЕН.'
+        assert ocr.fix_errors('Sex_ru', 'муш') == 'М'
+        assert ocr.fix_errors('Sex_ru', '.шен.') == 'Ж'
