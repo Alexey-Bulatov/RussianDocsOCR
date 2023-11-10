@@ -15,7 +15,7 @@ def process_img(**kwargs) -> dict:
     check_q = kwargs.get('check_quality')
 
     pipeline = kwargs.get('pipeline')
-    pipeline(img_path, check_quality=check_q, img_size=img_size)
+
     result = pipeline(img_path, check_quality=check_q, img_size=img_size)
     pp = pprint.PrettyPrinter(depth=4, indent=4)
     pp.pprint(result.full_report)
@@ -38,7 +38,10 @@ def main():
     parser.add_argument('--img_size', help='To which max size reshape image', required=False, default=1500, type=int)
     args = parser.parse_args()
     params = vars(args)
+
     pipeline = Pipeline(model_format=params['format'], device=params['device'], )
+    pipeline(params['img_path'], check_quality=params['check_q'], img_size=params['img_size'])
+
     params['pipeline'] = pipeline
     process_img(**params)
 
