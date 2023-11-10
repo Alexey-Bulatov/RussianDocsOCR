@@ -3,6 +3,7 @@ import os
 import time
 import sys
 from document_processing import Pipeline
+from process_img import process_img
 from pathlib import Path
 import pprint
 import argparse
@@ -26,6 +27,8 @@ if __name__ == '__main__':
     # cap = cv2.VideoCapture('http://192.168.0.1:8080/video', cv2.CAP_ANY)
     # cap.set(3, 1920)
     # cap.set(4, 1080)
+
+    pipeline = Pipeline(model_format='OpenVINO', device='cpu', )
 
     frames = 0
     fps = 0
