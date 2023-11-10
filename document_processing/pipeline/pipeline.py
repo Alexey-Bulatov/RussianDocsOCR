@@ -250,7 +250,7 @@ class Pipeline:
         # checking quality of doc
         if not low_quality:
             quality = self.results.quality
-            if quality['Glare'] == 'bad' or quality['Blur'] == 'bad' or quality['DocConf'] > docconf:
+            if quality.get('Glare', False) == 'bad' or quality.get('Blur', False) == 'bad' or quality['DocConf'] > docconf:
                 print("[!] Doc quality is too low. You can check using results.quality, "
                       "or bypass using low_quality=True")
                 return self.results
