@@ -61,7 +61,7 @@ def benchmark(**kwargs):
 
 def main():
     parser = argparse.ArgumentParser(description='Benchmark pipeline')
-    parser.add_argument('-i', '--images', help='Where to save results', type=str, default='images')
+    parser.add_argument('-i', '--images', help='From where to read images', type=str, default='../samples')
     parser.add_argument('-s', '--save_to', help='Where to save result in JSON format', type=str,
                         default=r'bench_results')
     parser.add_argument('-f', '--format', help='Select model format TFlite, ONNX, OpenVINO', type=str,
@@ -72,7 +72,7 @@ def main():
         '--cicles',
         help='How many cicles to run in images, more better accuracy',
         required=False,
-        default=5,
+        default=1,
         type=int)
 
 

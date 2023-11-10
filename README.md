@@ -14,6 +14,8 @@
 
 ## Установка библиотеки
 
+Поддерживается Python >= 3.9
+
 #### Клонируем библиотеку:
 `git clone https://github.com/protei300/RussianDocsOCR.git`
 
