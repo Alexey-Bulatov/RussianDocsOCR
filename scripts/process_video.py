@@ -50,10 +50,17 @@ if __name__ == '__main__':
         frame_time = time.time()
 
         ret, img = cap.read()
+
+        result = pipeline(img, check_quality=False, img_size=1500)
+        ocr_result = result.ocr
+        print(ocr_result)
+
         ###
         original_image = img
         cv2.putText(img, 'FPS = ' + str(fps), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (260, 80, 80), 1)
         ###
+
+
 
         ###
         cv2.imshow("Camera", img)
