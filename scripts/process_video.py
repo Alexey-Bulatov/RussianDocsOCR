@@ -17,11 +17,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 if __name__ == '__main__':
 
     # webcam
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # cap.set(3, 1920)
-    # cap.set(4, 1080)
-    cap.set(3, 1440)
-    cap.set(4, 720)
+    # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # # cap.set(3, 1920)
+    # # cap.set(4, 1080)
+    # cap.set(3, 1440)
+    # cap.set(4, 720)
 
     # mobile
     # cap = cv2.VideoCapture('http://192.168.0.1:8080/video', cv2.CAP_ANY)
