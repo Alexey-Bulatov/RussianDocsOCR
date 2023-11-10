@@ -20,8 +20,6 @@ def process_img(**kwargs):
     pp.pprint(result.full_report)
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(description='Benchmark pipeline')
     parser.add_argument('-i', '--img_path', help='Image path', type=Path, default='../samples/DL_2011/1_CR_DL_2010.jpg', )
@@ -37,6 +35,7 @@ def main():
     args = parser.parse_args()
     params = vars(args)
     process_img(**params)
+
 
 if __name__ == '__main__':
     main()
