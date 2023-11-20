@@ -124,7 +124,7 @@ result_with_warped = angle90.predict_transform(img='img.jpg') # if we want also 
 - email: vav@csu.ru
 
 ## Поддержка
-Данный проект реализуется в рамках гранта ФСИИ. 
+Данный проект выполнен при финансировании Фондс Содействия Инновациям https://fasie.ru/. 
 
 
 
