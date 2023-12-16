@@ -1,32 +1,22 @@
-import cv2
 import os
-import time
 import sys
-from document_processing import Pipeline
-from process_img import process_img
-from pathlib import Path
-import pprint
-import argparse
-import warnings
+import time
+
+import cv2
 
 sys.path.append('..')
+from document_processing import Pipeline
+import warnings
+
 warnings.filterwarnings("ignore")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 
 if __name__ == '__main__':
 
     # webcam
-    # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # # cap.set(3, 1920)
-    # # cap.set(4, 1080)
-    # cap.set(3, 1440)
-    # cap.set(4, 720)
-
-    # mobile
-    # cap = cv2.VideoCapture('http://192.168.0.1:8080/video', cv2.CAP_ANY)
-    # cap.set(3, 1920)
-    # cap.set(4, 1080)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    cap.set(3, 1440)
+    cap.set(4, 720)
 
     pipeline = Pipeline(model_format='OpenVINO', device='cpu', )
 
