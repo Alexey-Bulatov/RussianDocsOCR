@@ -15,6 +15,8 @@ def benchmark(**kwargs):
 
         for _ in range(kwargs['cicles']):
             for img in img_folder.glob('**/*.*'):
+                if img.suffix == '.json':
+                    continue
                 result = pipeline(img)
                 benchmark_list.append(result.timings['total'])
 
@@ -39,19 +41,26 @@ def benchmark(**kwargs):
         raw_doctypes = list(map(lambda x: x.stem, doctypes))
         df_result = pd.DataFrame(columns=raw_doctypes)
 
-    cpu_name = cpuinfo.get_cpu_info()['brand_raw']
 
-    bench_result = {cpu_name: {}}
+    if kwargs['device'] == 'cpu':
+        device_name = cpuinfo.get_cpu_info()['brand_raw']
+    else:
+        import subprocess
+        n = str(subprocess.check_output(["nvidia-smi", "-L"]))
+        device_name = n.split('GPU 0: ')[1].split(' (')[0]
+
+
+    bench_result = {device_name: {}}
 
 
     if len(doctypes) > 0:
         for img_folder in doctypes:
             print(f'[*] Collecting info for {img_folder.name}')
             result = test_pic(img_folder)
-            bench_result[cpu_name][img_folder.stem] = result
+            bench_result[device_name][img_folder.stem] = result
     else:
         result = test_pic(images_folder)
-        bench_result[cpu_name]['all'] = result
+        bench_result[device_name]['all'] = result
 
     benchmark_folder.parent.mkdir(parents=True, exist_ok=True)
     df_result = pd.concat((df_result, pd.DataFrame.from_dict(bench_result, orient='index')), ignore_index=False, axis=0)
