@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from .preprocessing import BasePreprocessing, ClassificationPreprocessing, YoloPreprocessing, OCRPreprocessing
 from .postprocessing import BasePostprocessing, MetricPostprocessing, OCRPostprocessing, \
@@ -6,6 +7,7 @@ from .inference import ModelInference
 import json
 from typing import Union, List
 import numpy as np
+
 
 class ModelLoader:
 
@@ -61,7 +63,7 @@ class ModelLoader:
         for outp_postprocess in self.json_file['Output']:
             postprocessings.append(
                 MetricPostprocessing(
-                    self.working_dir.joinpath(self.json_file['Centers']),
+                    self.working_dir.joinpath(str(self.json_file['Centers']).replace('\\', os.sep)),
                     metric=outp_postprocess['Metric'],
                     verbose=self.verbose
                 )

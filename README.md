@@ -20,7 +20,10 @@
 `git clone https://github.com/protei300/RussianDocsOCR.git`
 
 #### Устаналиваем зависимости:
-`pip -r requirements.txt`
+```
+cd RussianDocsOCR
+pip install -r requirements.txt
+```
 
 
 ## Описание структуры папок
