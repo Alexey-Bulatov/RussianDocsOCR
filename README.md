@@ -30,9 +30,9 @@
 ### Минимальные программно-аппаратные требования для библиотеки:
 - HDD: 500мб свободного места
 - CPU: x86 Intel core i3 gen 8 и выше или аналог от AMD
-- GPU Nvidia GTX 1060 и выше
+- GPU: Nvidia GTX 1060 и выше
 - RAM: 6 GB
-- OS: Windows 10 или Linux Ubuntu 20+
+- OS: Windows 10 или Linux Ubuntu 22 lts
 - Python: 3.9+.
 
 
