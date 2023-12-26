@@ -5,15 +5,27 @@ from typing import Union, Tuple
 
 
 class BasePreprocessing(object):
-    '''
-    Base class for preprocessing from which inherit other preprocessing classes
-    '''
+    """Base class for image preprocessing.
+
+    Defines common preprocessing operations like loading,
+    normalization and padding. Child classes implement
+    the full preprocessing pipeline.
+
+    Attributes:
+        image_size (tuple): Target size for input images
+        normalization (tuple): Mean and std dev for normalization
+        padding_size (tuple): Padding to add around images
+        padding_color (tuple): RGB color for padding
+        verbose (bool): Print logging messages if True
+
+    """
     def __init__(self,
                  image_size=(224, 224, 3),
                  normalization=(0, 1),
                  padding_size=(0,0),
                  padding_color = (114,114,114),
                  verbose=False):
+        """Initializes base preprocessing with parameters."""
         self.image_size = image_size
         self.normalization = normalization
         self.padding_size = padding_size
@@ -24,6 +36,14 @@ class BasePreprocessing(object):
 
 
     def __call__(self, image_path: Union[Path, str, np.ndarray]):
+        """Loads image from file path or NumPy array.
+
+        Args:
+            image_path: Path to image or NumPy array
+
+        Returns:
+            Loaded RGB image array
+        """
         if isinstance(image_path, Path) or isinstance(image_path, str):
             image = cv2.imread(image_path.as_posix() if isinstance(image_path, Path) else image_path)
             if image is None:
@@ -36,26 +56,49 @@ class BasePreprocessing(object):
 
         return image
     def padding(self, img: np.array):
+        """Adds padding of padding_size with padding_color.
+
+        Args:
+            img (np.array): Input image
+
+        Returns:
+            img (np.array): Image with added padding
+            pad (tuple): Dimensions of added padding
+        """
         pad_h, pad_v = self.padding_size
         img = cv2.copyMakeBorder(img, pad_v//2, pad_v//2 ,pad_h//2, pad_h//2, cv2.BORDER_CONSTANT, value=self.padding_color)
         return img, (pad_h//2, pad_v//2)
 
     def normalization(self, img: np.array, normalization: tuple):
+        """Normalizes image by mean and standard deviation.
+
+        Applies normalization using parameters in normalization.
+
+        Args:
+            img (np.array): Input image
+
+        Returns:
+            np.array: Normalized image
+        """
         mean, stdev = normalization
         img = img / stdev - mean
         return img
 
 
 class ClassificationPreprocessing(BasePreprocessing):
-    '''
-    Preprocessing for classification
-    '''
+    """Preprocessing for image classification models.
+
+    Performs padding, resizing and batching operations to prepare
+    images for a classification model.
+
+    """
     def __init__(self,
                  image_size=(224, 224, 3),
                  normalization=(0,1),
                  padding_size=(0,0),
                  padding_color=(0,0,0),
                  verbose=False):
+        """Initializes preprocessing for image classification."""
         super().__init__(image_size=image_size,
                          normalization=normalization,
                          padding_size=padding_size,
@@ -66,6 +109,19 @@ class ClassificationPreprocessing(BasePreprocessing):
         # print(f'[+] {self.__class__.__name__} loaded')
 
     def __call__(self, image_path: Union[Path, str, np.ndarray]):
+        """Runs classification preprocessing pipeline.
+
+        1. Loads image using base class call() method
+        2. Applies padding
+        3. Resizes image to model input shape
+        4. Adds batch dimension if needed
+
+        Args:
+            image_path: Path to input image
+
+        Returns:
+            Preprocessed image tensor
+        """
         image = super().__call__(image_path)
 
         image, _ = self.padding(image)
@@ -80,9 +136,12 @@ class ClassificationPreprocessing(BasePreprocessing):
 
 
 class YoloPreprocessing(BasePreprocessing):
-    '''
-    Preprocessing for YOLO
-    '''
+    """Preprocessing for YOLO models.
+
+    Performs padding, resizing and formatting operations needed to
+    prepare images for YOLO model input.
+
+    """
     def __init__(self,
                  image_size=(640, 640, 3),
                  normalization = (0,1),
@@ -90,6 +149,8 @@ class YoloPreprocessing(BasePreprocessing):
                  padding_color=(114,114,114),
                  verbose=False
                  ):
+        """Initializes YOLO preprocessing."""
+
         super().__init__(image_size=image_size,
                          normalization=normalization,
                          padding_size=padding_size,
@@ -99,6 +160,16 @@ class YoloPreprocessing(BasePreprocessing):
 
 
     def __call__(self, image_path: Union[Path, str, np.ndarray]):
+        """Runs YOLO image preprocessing pipeline.
+
+        1. Loads image
+        2. Applies padding
+        3. Resizes using letterbox to keep aspect ratio
+        4. Formats image channels and adds batch dim
+
+        Returns:
+           Image tensor, padding ratios, other metadata
+        """
 
         image = super().__call__(image_path)
 
@@ -130,17 +201,21 @@ class YoloPreprocessing(BasePreprocessing):
 
 
     def __letterbox(self, im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
-        '''
-        Function used for letterbox resize. It resize and uses padding to fill picture to new_shape size
-        :param im: image
-        :param new_shape: shape of new image
-        :param color: color for padding fill
-        :param auto: Make minimum rectangle as possible
-        :param scaleFill: should we use stretch
-        :param scaleup: IF needed should we use scaleup
-        :param stride: size, of squares. Used for Yolo5, default 32
-        :return:  new_image, ratio which been used to reduce size, padding size
-        '''
+        """Letterbox resize keeping aspect ratio.
+
+        Args:
+            img: Input image
+            new_shape: Size to resize to
+            color: Padding RGB color
+            auto: Make minimum rectangle as possible
+            scaleFill: should we use stretch
+            scaleup: IF needed should we use scaleup
+            stride: size, of squares, default 32
+
+        Returns:
+            Padded and resized image, pad ratios, pad sizes
+        """
+
         # Resize and pad image while meeting stride-multiple constraints
         shape = im.shape[:2]  # current shape [height, width]
         if isinstance(new_shape, int):
@@ -174,12 +249,19 @@ class YoloPreprocessing(BasePreprocessing):
 
 
 class OCRPreprocessing(BasePreprocessing):
+    """Preprocessing for OCR models.
+
+    Handles padding and resizing for OCR input images.
+
+    """
     def __init__(self,
                  image_size=(31, 200, 1),
                  normalization=(0,1),
                  padding_size=(0,0),
                  padding_color=(0,0,0),
                  verbose=False):
+        """Initializes OCR preprocessing."""
+
         super().__init__(image_size=image_size,
                          normalization=normalization,
                          padding_size=padding_size,
@@ -187,6 +269,19 @@ class OCRPreprocessing(BasePreprocessing):
                          verbose=verbose)
 
     def __call__(self, image_path: np.ndarray):
+        """Runs OCR preprocessing pipeline.
+
+        1. Loads image
+        2. Applies padding
+        3. Returns processed image
+
+        Args:
+           image_path: Path to input image
+
+        Returns:
+           Preprocessed image
+        """
+
         image = super().__call__(image_path)
 
         image = self.padding(image)
@@ -195,6 +290,18 @@ class OCRPreprocessing(BasePreprocessing):
 
     @staticmethod
     def recalc_image(original_shape: Tuple[int, int]) -> Tuple[int, int]:
+        """Recalculates image shape for padding.
+
+        Computes new height and width to preserve aspect
+        ratio for padding.
+
+        Args:
+            original_shape: Original image shape
+
+        Returns:
+            new_h, new_w: Target height and width
+        """
+
         target_h, target_w = [31, 200]
         orig_h, orig_w = original_shape
         new_h = target_h
@@ -208,6 +315,15 @@ class OCRPreprocessing(BasePreprocessing):
         return new_h, new_w
 
     def padding(self, image: np.ndarray) -> np.ndarray:
+        """Applies padding to resize and fit OCR input.
+
+        Args:
+            image: Input image
+
+        Returns:
+            Padded image
+        """
+
         target_shape = [31, 200]
         image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         resized = cv2.resize(image, self.recalc_image(image.shape)[::-1])

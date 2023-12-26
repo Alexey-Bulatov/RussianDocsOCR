@@ -5,7 +5,17 @@ import numpy as np
 
 
 class QualityChecker(object):
+    """Checks image quality by analyzing blur amount.
+
+    Attributes:
+        model: Blur detection ML model
+        canvas_size: Dimensions for image patch sampling
+        colors: Set of colors used when annotating
+
+    """
+
     def __init__(self, init_model, init_canvas_size):
+        """Initializes with blur model and canvas size."""
         self.model = init_model
         # canvas size in blocks
         self.canvas_size = init_canvas_size
@@ -23,6 +33,15 @@ class QualityChecker(object):
         self.tested_image = np.ndarray([])
 
     def perform_image(self, image):
+        """Analyzes image patches and detects blur.
+
+        Samples patches based on canvas_size, runs model
+        inference and populates quality_result_list.
+
+        Args:
+           image: Input document image
+
+        """
         self.quality_result_list = []
         canvas_in_pixels = tuple(map(lambda x: x * self.window_size, self.canvas_size))
         self.tested_image = cv2.cvtColor(cv2.resize(image, canvas_in_pixels), cv2.COLOR_BGR2RGB)
@@ -46,6 +65,16 @@ class QualityChecker(object):
         return True
 
     def annotate_image(self, image):
+        """Annotates image with blur detection results.
+
+        Draws bounding boxes and labels on blurred regions.
+
+        Args:
+           image: Input document image
+
+        Returns:
+           Annotated version of image
+        """
         self.perform_image(image)
 
         for block in self.quality_result_list:
@@ -89,6 +118,17 @@ class QualityChecker(object):
         return self.tested_image
 
     def check_image_quality(self, image):
+        """Computes overall quality score based on blur amount.
+
+        Analyzes blur on patches, aggregates scores and
+        returns overall document quality metric.
+
+        Args:
+           image: Input document image
+
+        Returns:
+           Quality score between 0-1
+        """
         self.perform_image(image)
         result_list = []
         for block in self.quality_result_list:

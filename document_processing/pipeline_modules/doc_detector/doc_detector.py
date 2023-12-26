@@ -7,14 +7,30 @@ import numpy as np
 
 
 class DocDetector(BaseModule):
+    """Detects document and fixes perspective issues.
 
+    Detects the document quadrangle, segments it from the background,
+    and fixes perspective issues by transforming the document to
+    a rectangular shape.
+
+    Provides options to get just the detection outputs or also warp
+    the document image to fix its perspective.
+
+    """
     def __init__(self, model_format: str = 'ONNX', device='cpu', verbose: bool = False):
-
+        """Initializes the document detection model"""
         self.model_name = 'DocDetector'
         super().__init__(self.model_name, model_format=model_format, device=device, verbose=verbose)
 
     def predict(self, img: Union[str, Path, np.ndarray]) -> dict:
+        """Predicts document detection outputs.
 
+        Args:
+            img: Input document image
+
+        Returns:
+            Dictionary with bboxes, masks and segmentation
+        """
         self.load_img(img)
 
         bbox, mask, segm = self.model.predict(img)
@@ -29,7 +45,14 @@ class DocDetector(BaseModule):
         return meta
 
     def predict_transform(self, img: Union[str, Path, np.ndarray]) -> dict:
+        """Predicts outputs and fixes document perspective.
 
+        Args:
+            img: Input document image
+
+        Returns:
+            Dictionary with detections outputs and warped image
+        """
         img = self.load_img(img)
         bbox, mask, segm = self.model.predict(img)
 

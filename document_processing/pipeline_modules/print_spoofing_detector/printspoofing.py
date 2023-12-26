@@ -6,20 +6,36 @@ import cv2
 
 
 class PrintSpoofing(BaseModule):
-    """
-    Detects reprint spoofing and copies
-    0 - a fake or copy
-    1 - a real one
-    I set the threshold to 0.9. The real document must have the confidence more than 0.9
+    """Detects printout spoofing in document images.
+
+    Analyzes image to identify fakes and photocopies.
+    Provides prediction and confidence score.
+
+    Attributes:
+        threshold (float): Minimum confidence threshold
+            for classifying as original (default: 0.9)
+
     """
     def __init__(self, model_format: str = 'ONNX', device='cpu', verbose=False):
+        """Initializes the anti-spoofing model."""
         self.model_name = 'PrintSpoofing'
+        self.threshold = 0.9
         super().__init__(self.model_name, model_format=model_format, device=device, verbose=verbose)
 
     def predict(self, img: Union[str, Path, np.ndarray]) -> dict:
+        """Classifies if image is a spoofed printout.
+
+        Args:
+            img (ndarray): Document image
+
+        Returns:
+            tuple:
+                bool/str: Spoof prediction
+                float: Confidence score
+        """
         self.load_img(img)
         result, conf = self.model.predict(img)
-        if conf < 0.9:
+        if conf < self.threshold:
             meta = {
                 self.model_name: ('FAKE', conf)
             }
@@ -29,11 +45,6 @@ class PrintSpoofing(BaseModule):
             }
         return meta
 
-    def predict_transform(self, img: Union[str, Path, np.ndarray]) -> dict:
-
-        meta = {}
-
-        return meta
 
 
 

@@ -11,9 +11,22 @@ import warnings
 warnings.filterwarnings("ignore")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-if __name__ == '__main__':
 
-    # webcam
+def main():
+    """Runs document analysis pipeline on live webcam stream.
+
+    Initializes camera capture and document analysis pipeline.
+    Displays live video overlayed with pipeline results including:
+
+    - Detected document type
+    - OCR extracted text
+    - Frame rate
+
+    The pipeline inference runs continously on a separate thread
+    to maximize frame rate. Output is printed and displayed.
+
+    Performs inference using OpenVINO models on CPU by default.
+    """
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     cap.set(3, 1440)
     cap.set(4, 720)
@@ -59,3 +72,7 @@ if __name__ == '__main__':
     cv2.waitKey(0)
     cap.release()
     cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()

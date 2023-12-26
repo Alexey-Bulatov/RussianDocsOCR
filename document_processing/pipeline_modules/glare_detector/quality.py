@@ -5,8 +5,18 @@ import numpy as np
 
 
 class QualityChecker(object):
+    """Checks image quality by analyzing patches.
+
+    Attributes:
+        model: Quality analysis ML model
+        canvas_size: Dimensions for sampling image patches
+        colors: Color codes for annotation
+        window_size: Size of each sampled patch
+
+    """
 
     def __init__(self, init_model, init_canvas_size):
+        """Initializes with quality model and analysis params."""
         self.model = init_model
         # canvas size in blocks
         self.canvas_size = init_canvas_size
@@ -24,6 +34,16 @@ class QualityChecker(object):
         self.tested_image = np.ndarray([])
 
     def perform_image(self, image):
+        """Analyzes image patches and detects glare.
+
+        Samples patches based on canvas_size, runs model
+        inference and populates quality_result_list.
+
+        Args:
+           image: Input document image
+
+        """
+
         self.quality_result_list = []
         canvas_in_pixels = tuple(map(lambda x: x * self.window_size, self.canvas_size))
         self.tested_image = cv2.cvtColor(cv2.resize(image, canvas_in_pixels), cv2.COLOR_BGR2RGB)
@@ -47,6 +67,16 @@ class QualityChecker(object):
         return True
 
     def annotate_image(self, image):
+        """Annotates image with glare detection results.
+
+        Draws bounding boxes and labels on glared regions.
+
+        Args:
+           image: Input document image
+
+        Returns:
+           Annotated version of image
+        """
         self.perform_image(image)
 
         for block in self.quality_result_list:
@@ -77,6 +107,7 @@ class QualityChecker(object):
         return self.tested_image
 
     def check_image_quality(self, image):
+        """Aggregates patch scores into overall quality score."""
         self.perform_image(image)
         result_list = []
         for block in self.quality_result_list:
@@ -96,40 +127,3 @@ class QualityChecker(object):
         quality_level = 1 - quality_level / max_level_for_normalization
         return quality_level
 
-    def video_processing(self):
-        frame_for_print = '0'
-        start = time.time()
-        frame = 0
-
-        canvas_in_pixels = tuple(map(lambda x: x * self.window_size, self.canvas_size))
-
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        cap.set(3, canvas_in_pixels[0])
-        cap.set(4, canvas_in_pixels[1])
-
-        while True:
-            time_diff = time.time() - start
-            frame += 1
-
-            if time_diff > 1:
-                frame_for_print = str(frame)
-                # print('FPS = ' + frame_for_print)
-                frame = 0
-                start = time.time()
-
-            ret, img = cap.read()
-            ##############################
-            cv2.putText(img, 'FPS = ' + frame_for_print, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, self.colors["c_blue"]
-                        , 2)
-            img = self.annotate_image(img)
-            ##############################
-            cv2.imshow("camera", img)
-            ##############################
-
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
-
-        cap.release()
-        cv2.destroyAllWindows()
-        return True

@@ -9,8 +9,29 @@ import pandas as pd
 import numpy as np
 
 def benchmark(**kwargs):
+    """Runs pipeline benchmark on images and saves results.
 
+    Runs pipeline multiple times on given images to benchmark
+    performance. Saves execution time by device and document type
+    to a CSV file.
+
+    Args:
+        kwargs: Dictionary of benchmark parameters
+            (format, device, images folder, save location, etc.)
+
+    """
     def test_pic(img_folder: Path):
+        """Tests pipeline speed on given image folder.
+
+        Runs pipeline on all images in folder repeatedly.
+        Calculates average execution time.
+
+        Args:
+            img_folder (Path): Folder with test images
+
+        Returns:
+            float: Average run time
+        """
         benchmark_list = []
 
         for _ in range(kwargs['cicles']):

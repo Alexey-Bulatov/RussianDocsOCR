@@ -7,7 +7,20 @@ import argparse
 
 
 def process_img(**kwargs) -> dict:
-    """Process 1 image"""
+    """Runs pipeline inference on an image.
+
+    Runs a provided document analysis pipeline on a single
+    input image. Prints and returns a detailed output report.
+
+    Args:
+        img_path: Path to input image
+        img_size: Resize image to this size before inference
+        check_q: Whether to run pipeline quality checks
+        pipeline: Configured Pipeline object
+
+    Returns:
+        dict: Pipeline output report for image
+    """
 
     assert kwargs.get('img_path') is not None, "Missing path to image"
     img_path = kwargs.get('img_path')
