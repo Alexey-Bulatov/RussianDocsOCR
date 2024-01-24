@@ -1,11 +1,10 @@
+# -*- coding: UTF-8 -*-
+import sys
+sys.path.append('..')
 import cv2
 import os
 import time
-import sys
 from document_processing import Pipeline
-from process_img import process_img
-from pathlib import Path
-import pprint
 import argparse
 import warnings
 
@@ -15,20 +14,47 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 if __name__ == '__main__':
+    '''
+    Video processing script shows how to work with video streams or webcams.
+    To run script use the command line
+    python process_video.py
+    - with default parameters
+    python process_video.py -v 'http://192.168.0.1:8080/video' -z (1440, 720) -d gpu
+    or just run this script in IDE
+    '''
+    parser = argparse.ArgumentParser(description='Video processing')
 
-    # webcam
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # cap.set(3, 1920)
-    # cap.set(4, 1080)
-    cap.set(3, 1440)
-    cap.set(4, 720)
+    parser.add_argument('-v', '--video_url',
+                        help='Choose video url or webcam. You can use file name like test_video.mov. You can use '
+                             '"webcam" or just a file name like test_video.mov or video stream like '
+                             'http://192.168.0.1:8080/video', type=str,
+                        default='webcam')
 
-    # mobile
-    # cap = cv2.VideoCapture('http://192.168.0.1:8080/video', cv2.CAP_ANY)
-    # cap.set(3, 1920)
-    # cap.set(4, 1080)
+    parser.add_argument('-z', '--screen_size',
+                        help='Select a screen size. In demo you can choose only 720p (1440, 720) or 1080p (1920, 1080)', type=str,
+                        default='720p')
 
-    pipeline = Pipeline(model_format='ONNX', device='gpu', )
+    parser.add_argument('-d', '--device', help='On which device to run - cpu or gpu', default='gpu', type=str)
+
+    args = parser.parse_args()
+    params = vars(args)
+
+    print(f'Start proccessing {params["video_url"]} with screen size {str(params["screen_size"])} on {str(params["device"])}...')
+
+    if params['video_url'] == 'webcam':
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    else:
+        cap = cv2.VideoCapture(params['video_url'], cv2.CAP_DSHOW)
+
+    if params['screen_size'] == '1080p':
+        cap.set(3, 1920)
+        cap.set(4, 1080)
+    # default screen size is 720p
+    else:
+        cap.set(3, 1440)
+        cap.set(4, 720)
+
+    pipeline = Pipeline(model_format='ONNX', device=params['device'], )
 
     frames = 0
     fps = 0
@@ -55,10 +81,9 @@ if __name__ == '__main__':
         if img is not None:
             original_image = img.copy()
         else:
-            print('Camera is not connected. Check camera connection.')
+            print('Camera is not connected or video stream inaccessible. Check camera connection or video stream.')
             cap.release()
             cv2.destroyAllWindows()
-
             break
 
         cv2.putText(img, 'FPS = ' + str(fps), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (260, 80, 80), 1)
