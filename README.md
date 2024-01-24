@@ -85,6 +85,27 @@ pip install -r requirements.txt
 
 Примеры запуска:
 
+Windows 
+1. Create and activate virtual env
+2. pip install -r requirements.txt
+3. run
+
+python process_video.py -v webcam -z 1080p -d gpu
+
+или
+
+python process_video.py
+
+с параметрами по умолчанию
+
+Linux
+1. Create and activate virtual env
+2. pip install -r requirements.txt
+3. sudo apt update
+4. sudo apt upgrade
+5. sudo apt-get install ffmpeg libsm6 libxext6
+
+6. run
 python process_video.py -v webcam -z 1080p -d gpu
 
 или
