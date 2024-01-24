@@ -41,11 +41,13 @@ if __name__ == '__main__':
 
     print(f'Start proccessing {params["video_url"]} with screen size {str(params["screen_size"])} on {str(params["device"])}...')
 
+    # Choosing the video source
     if params['video_url'] == 'webcam':
         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     else:
         cap = cv2.VideoCapture(params['video_url'], cv2.CAP_DSHOW)
 
+    # Choosing the resolution
     if params['screen_size'] == '1080p':
         cap.set(3, 1920)
         cap.set(4, 1080)
@@ -54,8 +56,10 @@ if __name__ == '__main__':
         cap.set(3, 1440)
         cap.set(4, 720)
 
+    # pipeline initialisation
     pipeline = Pipeline(model_format='ONNX', device=params['device'], )
 
+    # starting performing frames and calculating statistics
     frames = 0
     fps = 0
     frame_time = time.time()
@@ -77,7 +81,7 @@ if __name__ == '__main__':
 
         ret, img = cap.read()
 
-        ###
+        # check the existence of a video source
         if img is not None:
             original_image = img.copy()
         else:
