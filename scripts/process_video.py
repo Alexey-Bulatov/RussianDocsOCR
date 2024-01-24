@@ -58,6 +58,7 @@ if __name__ == '__main__':
             print('Camera is not connected. Check camera connection.')
             cap.release()
             cv2.destroyAllWindows()
+
             break
 
         cv2.putText(img, 'FPS = ' + str(fps), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (260, 80, 80), 1)
