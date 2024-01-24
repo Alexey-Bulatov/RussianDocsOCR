@@ -85,7 +85,7 @@ if __name__ == '__main__':
         if img is not None:
             original_image = img.copy()
         else:
-            print('Camera is not connected or video stream inaccessible. Check camera connection or video stream.')
+            print('Camera is not connected or video stream inaccessible. Check camera connection or a video stream.')
             cap.release()
             cv2.destroyAllWindows()
             break
