@@ -12,6 +12,19 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 def get_patches(*args, **kwargs):
+    """Extracts and saves words patches from documents.
+
+    Runs a document pipeline on images to detect words.
+    Saves extracted word patches organized by document type and
+    text field to prepare OCR training data.
+
+    Args:
+       folder_to: Folder path for saving patches
+       folder_from: Folder path containing document images
+       clear_folder: Whether to clear folder_to before saving
+
+    """
+
     folder_to = kwargs.get('folder_to')
     assert folder_to is not None, 'Missing folder to save'
     folder_to = Path(folder_to)

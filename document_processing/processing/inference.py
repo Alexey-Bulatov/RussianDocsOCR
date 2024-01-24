@@ -5,15 +5,29 @@ from importlib import import_module
 
 
 class ModelInference:
+    """Class for making inferences from different model types.
 
-    '''
-    Class that makes different types of inference. On initialization, according to type of model it sets prediction
-    '''
+    This class handles loading models in various formats such as TensorFlow, ONNX,
+    OpenVINO etc. and making predictions from them.
+
+    Attributes:
+        model: The loaded model object.
+        device (str): Device to use for inference - 'cpu' or 'gpu'.
+    """
     def __init__(self,
                  model_path: Path,
                  device: str = 'gpu',
                  verbose=False,
                  ):
+        """
+        Initializes the ModelInference class.
+
+        Args:
+          model_path (Path): Path to model file or directory.
+          device (str): Device to use for inference - 'cpu' or 'gpu'.
+          verbose (bool): Whether to print debug statements.
+        """
+
         self.device = device
 
         if model_path.suffix == '.h5':
@@ -73,11 +87,17 @@ class ModelInference:
 
 
     def predict(self, tensor:np.ndarray):
-        '''
-        Main function to call prediction
-        :param img_path:
-        :return:
-        '''
+        """Makes a prediction on the input tensor.
+
+        Runs inference on the loaded model.
+
+        Args:
+           tensor (numpy.ndarray): Input tensor for model.
+
+        Returns:
+           numpy.ndarray: Output prediction
+
+        """
         print("[!] Not yet generated")
 
     def __load_h5(self, model_path:Path):

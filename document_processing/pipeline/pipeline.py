@@ -11,13 +11,35 @@ from ..pipeline_modules import *
 
 @dataclass(init=False)
 class OCROptionsClass:
+    """Class for storing OCR options for different document types.
+
+    Holds common OCR options like fields needed, split preferences, etc.
+    Sub-classes implement options specific to document types.
+    """
+
+    """list: Fields that need to be split for this doc type."""
     needed_split = []
+
+    """list: English fields to recognize for this doc type."""
     en_fields = []
+
+    """list: Russian fields to recognize for this doc type."""
     ru_fields = []
+
+    """bool: Whether this doc type needs license number rotation."""
     needs_licence_rotation = False
+
 
     @classmethod
     def make_options(cls, doc_type):
+        """Factory method to make OCR options for a document type.
+
+        Args:
+            doc_type (str): Document type string
+
+        Returns:
+            OCROptionsClass instance with options for the document type.
+        """
         if 'intpassport' in doc_type.lower():
             return OCROptionsINTPassport()
         elif 'extpassport' in doc_type.lower():
@@ -28,9 +50,8 @@ class OCROptionsClass:
             return OCROptionsSNILS()
 
 class OCROptionsINTPassport(OCROptionsClass):
-    # needed_split = ["Last_name_ru", "First_name_ru", "Licence_number", "Issue_date",
-    #                 "Expiration_date", "Birth_date", "Birth_place_ru", "Issue_organization_ru",
-    #                 "Middle_name_ru", "Sex_ru"]
+    """OCR options for internal Russian passports."""
+
     needed_split = ["Licence_number",
                     "Birth_place_ru", "Issue_organization_ru",
                     ]
@@ -41,10 +62,8 @@ class OCROptionsINTPassport(OCROptionsClass):
     needs_licence_rotation = True
 
 class OCROptionsEXTPassport(OCROptionsClass):
-    # needed_split = ["Last_name_ru", "First_name_ru", "Last_name_en", "First_name_en", "Licence_number", "Issue_date",
-    #                 "Expiration_date", "Birth_date", "Birth_place_ru", "Birth_place_en", "Issue_organization_ru",
-    #                 "Issue_organization_en", "Living_region_ru", "Living_region_en",  "Middle_name_ru",
-    #                 "Issue_organisation_code", "Middle_name_en"]
+    """OCR options for external Russian passports."""
+
     needed_split = ["Licence_number", "Birth_place_ru", "Birth_place_en", ]
 
     en_fields = ["Last_name_en", "First_name_en", "Licence_number", "Issue_date",
@@ -56,10 +75,8 @@ class OCROptionsEXTPassport(OCROptionsClass):
 
 
 class OCROptionsDL(OCROptionsClass):
-    # needed_split = ["Last_name_ru", "First_name_ru", "Last_name_en", "First_name_en", "Licence_number", "Issue_date",
-    #                 "Expiration_date", "Driver_class", "Birth_date", "Birth_place_ru", "Birth_place_en",
-    #                 "Living_region_ru", "Living_region_en", "Middle_name_ru",
-    #                 "Middle_name_en"]
+    """OCR options for Russian driver's licenses."""
+
     needed_split = ["Licence_number", "Driver_class", "Birth_place_ru", "Birth_place_en",
                     "Living_region_ru", "Living_region_en", ]
     en_fields = ["Last_name_en", "First_name_en", "Licence_number", "Issue_date",
@@ -69,22 +86,30 @@ class OCROptionsDL(OCROptionsClass):
                  "Living_region_ru", "Middle_name_ru", ]
 
 class OCROptionsSNILS(OCROptionsClass):
+    """OCR options for Russian SNILS documents."""
+
     needed_split = ["Last_name_ru", "First_name_ru", "Licence_number", "Issue_date",
                     "Birth_date", "Birth_place_ru", "Middle_name_ru", "Sex_ru", ]
     en_fields = ["Licence_number", "Issue_date", "Birth_date"]
     ru_fields = ["Last_name_ru", "First_name_ru", "Birth_place_ru", "Middle_name_ru", "Sex_ru", ]
 
 class PipelineResults:
-    """Class that stores Pipeline results"""
+    """Stores results and metadata from a model pipeline.
+
+    Attributes:
+        meta_results (dict): Metadata from pipeline stages
+        _timings (dict): Timing measurements for stages
+
+    """
     def __init__(self):
+        """Initializes empty result storage."""
+
         self.meta_results = dict(Quality={})
         self._timings = dict()
 
-
-
     @property
     def ocr(self) -> Union[Dict, None]:
-        """Get result after ocr"""
+        """Gets OCR extraction results dict, if available."""
         if self.meta_results.get('OCR'):
             return self.meta_results.get('OCR')
         else:
@@ -92,18 +117,18 @@ class PipelineResults:
 
     @property
     def doctype(self) -> Union[str, None]:
-        """Get class of document"""
+        """Gets detected document type, if available."""
         doctype = self.meta_results.get('DocType')
         return doctype
 
     @property
     def quality(self) -> dict:
-        """Get quality info"""
+        """Gets image quality measurements."""
         return self.meta_results['Quality']
 
     @property
     def rotated_image(self) -> np.ndarray:
-        """Get rotated image after angle net"""
+        """Gets image rotated by the Angle90 stage."""
         return self.meta_results['Angle90']['warped_img']
 
     @property
@@ -130,7 +155,6 @@ class PipelineResults:
         else:
             return None
 
-
     @property
     def words_patches(self) -> Union[Dict, None]:
         """Get split words patches"""
@@ -141,7 +165,7 @@ class PipelineResults:
 
     @property
     def full_report(self) -> dict:
-        """returns full report in dict format"""
+        """Returns full report in dict format"""
         summary_dict = {}
         summary_dict['DocType'] = self.doctype
         summary_dict['OCR'] = self.ocr
@@ -149,13 +173,9 @@ class PipelineResults:
         summary_dict['Timings'] = self.timings
         return summary_dict
 
-
-
-
-
     @property
     def timings(self) -> dict:
-        """Get timing for each stage"""
+        """Gets per stage timings and total time."""
         total_time = 0
         timings = self._timings.copy()
         for value in timings.values():
@@ -165,17 +185,28 @@ class PipelineResults:
 
     @timings.setter
     def timings(self, value):
+        """Sets updated timings."""
         self._timings = self._timings | value
 
 
 
 
 class Pipeline:
+    """Pipeline for OCR processing of documents.
+
+    Performs steps of pre-processing, text detection and OCR
+    to extract text from documents.
     """
-    Our OCR pipeline realisation. It checks quality, fixes geometry, gets text fields and OCR them.
-    Results are stored in PipelineResult object, which has all necessary methods as properties
-    """
+
     def __init__(self, model_format='ONNX', device='cpu', verbose=False):
+        """
+        Initialize pipeline.
+
+        Args:
+            model_format (str): Format of models to use - ONNX, OpenVINO etc.
+            device (str): Device for model inference - cpu, gpu etc.
+            verbose (bool): Whether to print debug information.
+        """
         self.angle90 = Angle90(model_format=model_format, device=device, verbose=verbose)
         self.doctype = DocType(model_format=model_format, device=device, verbose=verbose)
         self.doc_detector = DocDetector(model_format=model_format, device=device, verbose=verbose)
@@ -191,12 +222,6 @@ class Pipeline:
         self.blur = Blur(model_format=model_format, device=device, verbose=verbose)
         self.ocr_options = OCROptionsClass
 
-
-
-
-
-
-
     def __call__(self, img_path: Union[Path, str, np.ndarray],
                  ocr=True,
                  get_doc_borders=True,
@@ -207,23 +232,25 @@ class Pipeline:
                  img_size=1500,
                  ) -> PipelineResults:
         """
-        Main function for pipeline job
-        :param img_path: Path to img, or allready opened image as np.ndarray
-        :param get_doc_borders: should we try to find doc borders and fix perspective
-        :param find_text_fields: should we search for text fields or stop pipeline
-        :param ocr: should we ocr
-        :param check_quality: check for blur and glare
-        :param low_quality: process for ocr low quality docs
-        :param docconf: document class confidence border below which we do not make fields detection and ocr
-        :param img_size: to which max size resize image (speeds processing)
+        Main pipeline processing method.
+
+        Args:
+            img_path: Path to input image.
+            ocr: Whether to perform OCR.
+            get_doc_borders: Whether to detect document borders.
+            find_text_fields: Whether to detect text fields.
+            check_quality: Whether to check image quality.
+            low_quality: Whether to process low quality images.
+            docconf: Minimum doc confidence threshold.
+            img_size: Resize image to this size for processing.
+
+        Returns:
+            PipelineResults with extracted information.
         """
 
         self.results = PipelineResults()
 
         img = self._prepare_image(img_path, img_size=img_size)
-
-
-
 
         self.time_measure = {}
 
@@ -284,17 +311,30 @@ class Pipeline:
 
 
     def _angle(self, img):
-        '''
-        checking and fixing angle image angle
-        '''
+        """
+        Detect and fix angle of image.
+
+        Args:
+            img: Input image as numpy array.
+
+        Returns:
+            np.ndarray: Image with fixed angle.
+        """
         result = self.angle90.predict_transform(img)
         self.results.meta_results = self.results.meta_results | result
         # return result[self.angle90.model_name]['warped_img']
 
     def _doctype(self, img):
-        '''
-        getting doctype and conf
-        '''
+        """
+        Detect document type and confidence.
+
+        Args:
+            img: Input image
+
+        Returns:
+            str: Detected document type
+            float: Confidence score
+        """
         result = self.doctype.predict(img)
         doc_type, confidence = result[self.doctype.model_name].values()
         self.results.meta_results['DocType'] = doc_type
@@ -302,29 +342,25 @@ class Pipeline:
         return doc_type
 
     def _glare(self, img):
-        '''
-        getting glare status
-        '''
+        """Check for glare quality"""
         qual, coef = self.glare.predict(img)[self.glare.model_name]
         self.results.meta_results['Quality']['Glare'] = qual
         return qual
 
     def _blur(self, img):
-        '''
-        getting blur status
-        '''
+        """Check for blur quality."""
         qual, coef = self.blur.predict(img)[self.blur.model_name]
         self.results.meta_results['Quality']['Blur'] = qual
         return qual
 
     def _print_spoofing(self, img):
-        """checking for print spoofing"""
+        """Check for print spoofing."""
         qual, coef = self.print_spoofing.predict(img)[self.print_spoofing.model_name]
         self.results.meta_results['Quality']['PrintSpoofing'] = qual
         return qual
 
     def _lcd_spoofing(self, img):
-        """checking for print spoofing"""
+        """Check for LCD spoofing."""
         qual, coef = self.lcd_spoofing.predict(img)[self.lcd_spoofing.model_name]
         self.results.meta_results['Quality']['LCDSpoofing'] = qual
         return qual
@@ -332,18 +368,31 @@ class Pipeline:
 
 
     def _doc_detector(self, img):
-        '''
-        searching doc segments and fixing perspective
-        '''
+        """
+        Detect document borders and fix perspective.
+
+        Args:
+            img: Input image
+
+        Returns:
+            np.ndarray: Image with fixed perspective
+        """
         result = self.doc_detector.predict_transform(img)
         self.results.meta_results = self.results.meta_results | result
         # img = result[self.doc_detector.model_name]['warped_img']
         # return img
 
     def _fields_detector(self, img, rotate_licence=False):
-        '''
-        detecting fields in a document
-        '''
+        """
+        Detect text fields in document.
+
+        Args:
+            img: Input image
+            rotate_licence: Whether to rotate license field
+
+        Returns:
+            dict: Detected text fields and patches
+        """
         result = self.text_fields.predict_transform(img)
         text_fields = result[self.text_fields.model_name]
 
@@ -359,9 +408,15 @@ class Pipeline:
 
 
     def _split_words(self, text_fields: dict, doc_type:str):
-        '''
-        Splitting text fields into separate words
-        '''
+        """
+        Split text fields into words.
+
+        Args:
+            text_fields: Detected text fields
+
+        Returns:
+            dict: Text fields splitted into words
+        """
 
         bboxes, patches = text_fields.values()
 
@@ -404,9 +459,15 @@ class Pipeline:
         return result
 
     def _ocr(self, words_dict: dict, doc_type:str):
-        '''
-        Making patches OCR
-        '''
+        """
+        Perform OCR on splitted words.
+
+        Args:
+            words: Text fields splitted into words
+
+        Returns:
+            dict: OCR text for input words
+        """
         ocr_dict = {}
         for field_name, words in words_dict.items():
             ocred_words = []
@@ -442,21 +503,23 @@ class Pipeline:
         # self.results.meta_results[self.words_detector.model_name] = words_dict
 
     def _model_call(self, func, *args, **kwargs):
-        '''
-        wrapper for timing
-        '''
+        """ Wrapper for making timing calculations."""
         time_start = time()
         result = func(*args, **kwargs)
         self.results.timings = {func.__name__: round(time() - time_start, 4)}
         return result
 
     def _prepare_image(self, img_path: Union[Path, str, np.ndarray], img_size: int = 1500):
-        '''
-        Opening image and resize it to 1500 px
-        :param img_path:
-        :param img_size:
-        :return:
-        '''
+        """
+        Load image from path, validate it and resize.
+
+        Args:
+            img_path: Path to input image.
+            img_size: Resize image to this size.
+
+        Returns:
+            np.ndarray: Loaded and resized image.
+        """
 
         if isinstance(img_path, Path):
             img = cv2.imdecode(np.frombuffer(img_path.read_bytes(), dtype=np.uint8), cv2.IMREAD_COLOR)

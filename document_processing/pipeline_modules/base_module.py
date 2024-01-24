@@ -7,14 +7,23 @@ import cv2
 import json
 
 class BaseModule:
+    """Base model class for loading and inference.
 
+    Handles common model loading, input/output pipelines for
+    machine learning models.  Child classes implement specific
+    models functionality.
+
+    Provides base predict() and predict_transform() methods for
+    running inference on inputs with/without postprocessing.
+
+    Attributes:
+        model: Loaded machine learning model
+        model_info: Metadata of loaded model
+        model_name: Name of machine learning model
+
+    """
     def __init__(self, model_name: str, model_format: str = 'ONNX', device='cpu', verbose: bool = False):
-        '''
-        Loads model from json
-        :param model_name: name of model to load
-        :param model_format: which format of model to load
-        :param device: load on cpu or gpu
-        '''
+        """Initializes base model and loads model artifact."""
         if model_name in DEFAULT_CFG.keys():
             self.__model_path = Path(DEFAULT_CFG.get(model_name)).joinpath(model_format, 'model.json')
         else:
@@ -28,36 +37,41 @@ class BaseModule:
 
     @property
     def model_info(self) -> dict:
-        '''
-        Returns info about model in dict format
-        :return: dict
-        '''
+        """Returns info about model in dict format
+
+        Returns:
+            model info in a dict format
+        """
         return self.__model_info
 
 
 
     def predict(self, img: Union[str, Path, np.ndarray]) -> dict:
-        '''
+        """
         Just passes img to net and returns result from net without any transformations
-        :param img: Can be Path type, str type or np.ndarray
-        :return: meta in dict format
-        '''
+
+        Args:
+            img: Can be Path type, str type or np.ndarray
+
+        Returns:
+            meta in dict format
+        """
         pass
 
 
     def predict_transform(self, img: Union[str, Path, np.ndarray]) -> dict:
-        '''
-        Sends img to net and applies transformation function according to net result
-        :param img: Can be Path type, str type or np.ndarray
-        :return: modified img, meta in dict format
-        '''
+        """Sends img to net and applies transformation function according to net result
+        Args:
+            img: Can be Path type, str type or np.ndarray
+
+        Returns:
+            modified img, meta in dict format
+        """
         pass
 
     @staticmethod
     def load_img(img_path: Union[str, Path, np.ndarray]):
-        '''
-        Method that loads image and converts it to RGB color mode
-        '''
+        """Method that loads image and converts it to RGB color mode"""
         if isinstance(img_path, Path):
             img = cv2.imread(img_path.as_posix())
             img = cv2.cvtColor(img ,cv2.COLOR_BGR2RGB)

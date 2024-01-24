@@ -5,41 +5,110 @@ import cv2
 
 
 class BasePostprocessing:
+    """Base class for postprocessing steps.
+
+    This class provides a common interface for postprocessing
+    steps in a machine learning pipeline. Child classes should
+    implement the actual postprocessing logic in the call() method.
+
+    Attributes:
+        verbose (bool): Whether to print logging messages during init.
+        Defaults to False.
+
+    """
 
     def __init__(self, verbose: bool = False):
+        """Initialize the postprocessing object.
+
+        Args:
+            verbose (bool): Whether to print a loaded message on init.
+                            Defaults to False.
+        """
+
         if verbose:
             print(f"[+] {self.__class__.__name__} loaded")
 
     def __call__(self, *args, **kwargs):
+        """Runs postprocess logic on provided arguments.
+
+        This method should be implemented by child classes to
+        execute the actual postprocessing logic.
+        """
         pass
 
 
 class BinaryClassPostprocessing(BasePostprocessing):
-    '''
-    Postprocessing for Binary classification
-    '''
+    """Postprocessing for binary classification models.
+
+    Attributes:
+        labels (list): Class labels used for model
+        threshold (float): Threshold for positive classification.
+                           Defaults to 0.5.
+
+    """
     def __init__(self, labels: list, threshold=0.5, verbose=False):
-        '''
-        :param threshold: threshold which transform probability into 0 and 1
-        '''
+        """Initializes postprocessing object.
+
+        Args:
+            labels (list): Class labels
+            threshold (float): Threshold for positive classification.
+                               Defaults to 0.5.
+            verbose (bool): Prints message on init if True.
+                            Defaults to False.
+        """
         super().__init__(verbose)
         self.labels=labels
         self.threshold = threshold
     def __call__(self, probability: np.ndarray, **kwargs):
-        '''
-        :param probability: result of dense layer from net
-        :return: Label and confidence
-        '''
+        """Transforms network output to class label and confidence.
+
+        Args:
+            probability (np.ndarray): Output probability from network
+
+        Returns:
+            str: Class label
+            float: Confidence probability
+        """
         return self.labels[0 if probability[0] < self.threshold else 1], probability[0]
 
 
 class OCRPostprocessing(BasePostprocessing):
+    """Postprocessing for OCR models.
+
+    Transforms model output to decoded text string.
+    Supports English and Russian languages.
+
+    Attributes:
+        lang (str): Language to use for decoding text.
+                    Must be either 'eng' or 'rus'.
+
+    """
+
     def __init__(self, lang: str, verbose=False):
+        """Initializes the OCR postprocessing.
+
+        Args:
+            lang (str): Language to decode text into.
+                        Must be either 'eng' or 'rus'.
+            verbose (bool): Whether to print logging message.
+                            Defaults to False.
+        """
+
+
         super().__init__(verbose)
         assert lang in ['eng', 'rus']
         self.lang = lang
 
     def __call__(self, output_value: np.ndarray) -> str:
+        """Transforms network output values into text string.
+
+        Args:
+            output_value (np.ndarray): Output values from network
+
+        Returns:
+            str: Decoded text string
+        """
+
         labels = string.digits + string.ascii_uppercase + "%'(),-./:*#" if self.lang == 'eng' \
             else "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ.-"
 
@@ -93,24 +162,62 @@ class MetricPostprocessing(BasePostprocessing):
 
 
 class MultiClassPostprocessing(BasePostprocessing):
-    '''
-    Postprocessing for multi class classification.
-    '''
+    """Postprocessing for metric learning models.
+
+    Supports both euclidean and cosine distance metrics.
+    Classifies input vector against loaded centroid coordinates.
+
+    Attributes:
+        centers (Path): File path to serialized centroids
+        metric (str): Distance metric to use.
+                      Must be either 'euclidean' or 'cosine'.
+
+    """
     def __init__(self, labels: list, verbose=False):
+        """Initializes metric postprocessing.
+
+        Args:
+            centers (Path): File path to serialized centroids
+            metric (str): Distance metric to use. Must be
+                          'euclidean' or 'cosine'.
+            verbose (bool): Print logging messages if True.
+                            Defaults to False.
+        """
         super().__init__(verbose)
         self.labels = labels
 
     def __call__(self, probability: np.ndarray, **kwargs):
-        '''
-        :param probability: result from net
-        :return: Method returns label and confidence
-        '''
+        """Classifies vector against loaded centroids.
+
+        Args:
+            vector: Input vector from model
+
+        Returns:
+            tuple: Label, distance, threshold
+        """
         return self.labels[probability.argmax()], probability.max(initial = 0)
 
 
 class YoloDetectorPostprocessing(BasePostprocessing):
+    """
+    Class for postprocessing YOLO detector predictions
+    and preparing detection results
 
+    Attributes:
+        iou (float): IOU threshold for NMS
+        cls (float): confidence threshold
+        labels (list): list of class labels
+        verbose (bool): enable verbose output
+    """
     def __init__(self, labels:list, iou=0.2, cls=0.5, verbose=False):
+        """
+        Initialize class parameters
+        Args:
+            iou (float): IOU threshold for NMS
+            cls (float): confidence threshold
+            labels (list): list of class labels
+            verbose (bool): enable verbose output
+        """
         super().__init__(verbose)
         self.iou = iou
         self.cls = cls
@@ -121,16 +228,18 @@ class YoloDetectorPostprocessing(BasePostprocessing):
                  vector: np.ndarray,
                  **kwargs,
                  ):
-        '''
-        Function translates predictions from yolo detector
-        :param prediction: Tensor from yolo exit
-        :param imgsize: size of image, h,w
-        :param conf_thresh: class confidence threshold
-        :param iou_thresh:  intersection over union threshold
-        :return: return list of lists, which contains - x_top, y_top, x_bottom, y_bottom, conf, label index, label
-        '''
-
-
+        """
+        Run postprocessing on YOLO predictions
+        Args:
+            vector (np.ndarray): YOLO predictions
+            **kwargs: additional metadata:
+                prediction: Tensor from yolo exit
+                imgsize: size of image, h,w
+                conf_thresh: class confidence threshold
+                iou_thresh:  intersection over union threshold
+        Returns:
+            list: detection results
+        """
 
         if kwargs.get('padding_meta') is None:
             padding_meta = {
@@ -194,7 +303,13 @@ class YoloDetectorPostprocessing(BasePostprocessing):
 
     @staticmethod
     def xywh2xyxy(x):
-        # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
+        """
+        Convert bounding boxes from XYWH to XYXY format
+        Args:
+            x (np.ndarray): bounding boxes in XYWH format
+        Returns:
+            np.ndarray: bounding boxes in XYXY format
+        """
         y = np.copy(x)
         y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
         y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
@@ -204,13 +319,15 @@ class YoloDetectorPostprocessing(BasePostprocessing):
 
     @staticmethod
     def nms(bounding_boxes: np.array, confidence_score: np.array, threshold: float):
-        '''
-        Finds best boxes for found objects
-        :param bounding_boxes: coords of boxes
-        :param confidence_score: np.ndarray with shape (n, 1)
-        :param threshold: IoU_threshold
-        :return: array of indexes, that corresponds to best found BOXES
-        '''
+        """
+        Apply non-maximum suppression to remove overlapping boxes
+        Args:
+            bounding_boxes (np.ndarray): bounding box coordinates
+            confidence_score (np.ndarray): confidence scores
+            threshold (float): IOU threshold
+        Returns:
+            list: indices of kept bounding boxes
+        """
 
         # If no bounding boxes, return empty list
         if len(bounding_boxes) == 0:
@@ -272,18 +389,38 @@ class YoloDetectorPostprocessing(BasePostprocessing):
 
 
 class YoloSegmentorPostprocessing(BasePostprocessing):
+    """Postprocessing for YOLO segmentation models.
+
+    Transforms raw masks into final masks and segments.
+
+    Attributes:
+        mask_filter (float): Filtering threshold to apply to masks.
+
+    """
 
     def __init__(self, mask_filter: float = 0.8, verbose=False):
+        """Initializes YOLO segmentation postprocessing.
+
+        Args:
+            mask_filter (float): Filtering threshold for masks.
+            verbose (bool): Print message on init if True.
+
+        """
         super().__init__(verbose)
         assert 0<=mask_filter<=1, "[!] Filter must be within [0..1]"
         self.mask_filter = mask_filter
 
 
     def __call__(self, proto_masks: np.array, masks: np.array, bbox: np.array, extra_padding:tuple, img_shape: list, upsample=True):
-        '''
-        Method takes masks from YOLO net and transforms it according to result of YOLODetection layer.
-        :return: Masks of found objects and segments according to mask
-        '''
+        """Transforms raw YOLO masks into final masks & segments.
+
+        Args:
+            Various args for processing masks
+
+        Returns:
+            Processed masks, generated segments
+
+        """
         imh, imw, chn = proto_masks.shape
         im_orig_h, im_orig_w = img_shape
 
@@ -319,6 +456,14 @@ class YoloSegmentorPostprocessing(BasePostprocessing):
 
     @staticmethod
     def get_segments(masks):
+        """Generates segments from input masks.
+
+        Args:
+            masks (np.ndarray): Array of input masks
+
+        Returns:
+            List of generated segments
+        """
         segments=[]
         for x in masks.astype('uint8'):
             c = cv2.findContours(x, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
@@ -331,6 +476,17 @@ class YoloSegmentorPostprocessing(BasePostprocessing):
 
     @staticmethod
     def clip_boxes(masks, boxes):
+        """Clips masks to fit within given bounding boxes.
+
+        Removes mask parts outside of the provided boxes.
+
+        Args:
+           masks (np.ndarray): Input masks
+           boxes (np.ndarray): Bounding box coordinates
+
+        Returns:
+           Clipped masks
+        """
         n, h, w = masks.shape
         # print(boxes)
         x1, y1, x2, y2 = np.split(boxes, 4, axis=1)
@@ -351,4 +507,12 @@ class YoloSegmentorPostprocessing(BasePostprocessing):
 
     @staticmethod
     def sigmoid(x:np.array) -> np.array:
+        """Applies sigmoid function.
+
+        Args:
+            x (np.ndarray): Input vector
+
+        Returns:
+            Vector after applying sigmoid
+        """
         return 1 / (1 + np.exp(-x))

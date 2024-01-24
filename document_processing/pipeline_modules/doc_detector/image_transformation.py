@@ -4,9 +4,15 @@ import cv2
 
 
 def iou(bbox1: np.ndarray, bbox2: np.ndarray):
-    '''
-    calculate IOU for 2 bboxes in xyxy format
-    '''
+    """Compute intersection over union between two bboxes.
+
+    Args:
+        bbox1 (ndarray): First bounding box
+        bbox2 (ndarray): Second bounding box
+
+    Returns:
+        IoU ratio value
+    """
     area1 = (bbox1[..., 2] - bbox1[..., 0]) * (bbox1[..., 3] - bbox1[..., 1])
     area2 = (bbox2[..., 2] - bbox2[..., 0]) * (bbox2[..., 3] - bbox2[..., 1])
 
@@ -23,7 +29,14 @@ def iou(bbox1: np.ndarray, bbox2: np.ndarray):
     return ratio
 
 def xywh2xyxy(x):
-    # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
+    """Convert bboxes from (x,y,w,h) to (x1,y1,x2,y2) format.
+
+    Args:
+        x (ndarray): Bounding boxes in x,y,w,h format
+
+    Returns:
+        Converted bboxes in x1,y1,x2,y2 format
+    """
     y = np.copy(x)
     y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
     y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
@@ -32,11 +45,14 @@ def xywh2xyxy(x):
     return y
 
 def sort_coordinates(list_of_xy_coords):
-    '''
-    Sort coordinates clockwise
-    :param list_of_xy_coords:
-    :return:
-    '''
+    """Sorts coordinates clockwise from centroid.
+
+    Args:
+        coords (list): List of (x, y) coordinate tuples
+
+    Returns:
+        Sorted coordinate list
+    """
     cx, cy = list_of_xy_coords.mean(0)
     x, y = list_of_xy_coords.T
     angles = np.arctan2(x-cx, y-cy)
@@ -44,21 +60,44 @@ def sort_coordinates(list_of_xy_coords):
     return list_of_xy_coords[indices]
 
 def get_angles(list_of_coords):
+    """Calculates angle between adjacent coordinates.
+
+    Args:
+        coords (list): List of (x, y) tuples
+
+    Prints:
+        Angles between adjacent coordinate pairs
+    """
     x, y = list_of_coords.T
     x_shifted, y_shifted = np.roll(list_of_coords,-1, axis=0).T
     print(np.arctan2(x_shifted-x, y_shifted - y)/np.pi*180)
 
 
 def perp( a ) :
+    """Calculates perpendicular vector.
+
+    Args:
+        a (list): Input 2D vector
+
+    Returns:
+        Perpendicular 2D vector
+    """
     b = np.empty_like(a)
     b[0] = -a[1]
     b[1] = a[0]
     return b
 
-# line segment a given by endpoints a1, a2
-# line segment b given by endpoints b1, b2
-# return
+
 def seg_intersect(a1,a2, b1,b2) :
+    """Finds intersection point of two lines.
+
+    Args:
+        a1, a2 (list): Endpoints of first line
+        b1, b2 (list): Endpoints of second line
+
+    Returns:
+        Intersection point
+    """
     da = a2-a1
     db = b2-b1
     dp = a1-b1
@@ -68,6 +107,14 @@ def seg_intersect(a1,a2, b1,b2) :
     return (num / denom.astype(float))*db + b1
 
 def get_len(list_of_coords):
+    """Approximates quadrangle from coordinates.
+
+    Args:
+        coords (list): List of (x, y) tuples
+
+    Returns:
+        Approx quadrangle coordinates
+    """
 
     n_coord = len(list_of_coords)
 
@@ -106,12 +153,16 @@ def get_len(list_of_coords):
 
 
 def fix_perspective(img: np.ndarray, segments: np.ndarray, ):
-    '''
-    Fixes perspective using segments
-    :param img:
-    :param segments:
-    :return: warped image, contour image
-    '''
+    """Fix perspective of doc image using segments.
+
+    Args:
+        img: Input document image
+        segments: Document segment coordinates
+
+    Returns:
+        warped: Rectified document image
+        border_img: Image with segment borders drawn
+    """
     cnts, imgs = [], []
 
     for cnt in segments:
