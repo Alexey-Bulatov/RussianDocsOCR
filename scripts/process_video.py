@@ -21,6 +21,9 @@ if __name__ == '__main__':
     - with default parameters
     python process_video.py -v 'http://192.168.0.1:8080/video' -z 720p -d gpu
     or just run this script in IDE
+    For using GPU make sure that CUDA execution provider has been installed properly
+    Installation guide for Windows and for Linux is here
+    https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html
     '''
     parser = argparse.ArgumentParser(description='Video processing')
 

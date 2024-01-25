@@ -83,7 +83,11 @@ pip install -r requirements.txt
 Вы можете выбрать на каком устройстве обрабатывать видео gpu - видеокарта или cpu - процессор
 по умолчанию gpu
 
-Примеры запуска:
+Убедитесь что вы установили верно драйвера CUDA, CUDNN и драйвера видео карты для запуска на GPU
+Инструкция по установке тут:
+https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html
+
+- Примеры запуска:
 
 Windows 
 1. Create and activate virtual env
