@@ -150,7 +150,11 @@ class ModelInference:
     def __load_onnx(self, model_path: Path):
         onnx_model_path = model_path.as_posix()
         if self.device == 'gpu':
-            providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+            if self.ort.cuda_version == '':
+                print(f"[!] {self.device} not found, using cpu")
+                providers = ['CPUExecutionProvider',]
+            else:
+                providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
         else:
             providers = ['CPUExecutionProvider', ]
         self.model = self.ort.InferenceSession(onnx_model_path, providers=providers)
@@ -161,6 +165,9 @@ class ModelInference:
     def __load_openvino(self, model_path: Path):
         core = self.openvino.Core()
         ov_model = self.openvino.convert_model(model_path)
+        if self.device.upper() not in core.available_devices:
+            print(f"[!] {self.device} not found, using cpu")
+            self.device='cpu'
         self.model = core.compile_model(ov_model, device_name=self.device.upper())
 
     def __load_coreml(self, model_path: Path):
