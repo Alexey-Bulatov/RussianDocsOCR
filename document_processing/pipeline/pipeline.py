@@ -207,6 +207,7 @@ class Pipeline:
             device (str): Device for model inference - cpu, gpu etc.
             verbose (bool): Whether to print debug information.
         """
+        print(f'DEVICE: {device}')
         self.angle90 = Angle90(model_format=model_format, device=device, verbose=verbose)
         self.doctype = DocType(model_format=model_format, device=device, verbose=verbose)
         self.doc_detector = DocDetector(model_format=model_format, device=device, verbose=verbose)

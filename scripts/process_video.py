@@ -46,9 +46,9 @@ if __name__ == '__main__':
 
     # Choosing the video source
     if params['video_url'] == 'webcam':
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(0, cv2.CAP_ANY)
     else:
-        cap = cv2.VideoCapture(params['video_url'], cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(params['video_url'], cv2.CAP_ANY)
 
     # Choosing the resolution
     if params['screen_size'] == '1080p':
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
         cv2.putText(img, 'FPS = ' + str(fps), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (260, 80, 80), 1)
         ###
-        result = pipeline(original_image, check_quality=False, low_quality=False, docconf=0.2, img_size=1500)
+        result = pipeline(original_image, check_quality=False, low_quality=True, docconf=0.2, img_size=1500)
         ocr_result = result.ocr
         print(ocr_result)
         ###

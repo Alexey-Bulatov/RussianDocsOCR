@@ -150,7 +150,7 @@ class ModelInference:
     def __load_onnx(self, model_path: Path):
         onnx_model_path = model_path.as_posix()
         if self.device == 'gpu':
-            if self.ort.cuda_version == '':
+            if 'CUDAExecutionProvider' not in self.ort.get_available_providers():
                 print(f"[!] {self.device} not found, using cpu")
                 providers = ['CPUExecutionProvider',]
             else:
@@ -165,7 +165,8 @@ class ModelInference:
     def __load_openvino(self, model_path: Path):
         core = self.openvino.Core()
         ov_model = self.openvino.convert_model(model_path)
-        if self.device.upper() not in core.available_devices:
+        devices_list = [x.split('.')[0] for x in core.available_devices]
+        if self.device.upper() not in devices_list:
             print(f"[!] {self.device} not found, using cpu")
             self.device='cpu'
         self.model = core.compile_model(ov_model, device_name=self.device.upper())
