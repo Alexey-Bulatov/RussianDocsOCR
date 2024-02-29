@@ -12,6 +12,8 @@ sys.path.append('..')
 warnings.filterwarnings("ignore")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+DISPLAY_IS_AVAILABLE = os.getenv('DISPLAY') is not None or os.name != 'posix'
+
 
 if __name__ == '__main__':
     '''
@@ -99,8 +101,9 @@ if __name__ == '__main__':
         ocr_result = result.ocr
         print(ocr_result)
         ###
-        cv2.imshow("Camera", img)
-
+        if DISPLAY_IS_AVAILABLE:
+            cv2.imshow("Camera", img)
+        
         k = cv2.waitKey(30) & 0xff
         if k == 27:
             break
