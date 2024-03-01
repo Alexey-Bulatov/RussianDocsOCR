@@ -57,7 +57,10 @@ pip install -r requirements.txt
 ## Использование библиотеки
 
 ### Готовые скрипты
-Готовые скрипты хранятся в папке scripts
+Готовые скрипты хранятся в папке scripts. 
+
+Перейти в папку можно набрав
+`cd scripts`
 
 #### `process_img.py` - Скрипт запускающий конвейер на 1 изображении в формате CLI. 
 
@@ -90,31 +93,27 @@ https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html
 - Примеры запуска:
 
 Windows 
-1. Create and activate virtual env
+1. Create and activate virtual env - создать и активировать виртуальное окружение. Для его создания ознакомьтесь 
+с информацией по ссылке https://docs.python.org/3/library/venv.html
 2. pip install -r requirements.txt
-3. run
+3. Можно пользоваться библиотекой 
 
-python process_video.py -v webcam -z 1080p -d gpu
-
-или
-
-python process_video.py
-
-с параметрами по умолчанию
+Например перейдя в папку `scripts` набрать: `python process_video.py -v webcam -z 1080p -d gpu` для работы с видеопотоком
+с определенными параметрами
+или `python process_video.py` с параметрами по умолчанию для работы с видеопотоком  
 
 Linux
-1. Create and activate virtual env
+1. Create and activate virtual env - создать и активировать виртуальное окружение. Для его создания ознакомьтесь 
+с информацией по ссылке https://docs.python.org/3/library/venv.html
 2. pip install -r requirements.txt
 3. sudo apt update
 4. sudo apt upgrade
 5. sudo apt-get install ffmpeg libsm6 libxext6
+6. Можно работать с библиотекой
 
-6. run
-python process_video.py -v webcam -z 1080p -d gpu
-
-или
-
-python process_video.py
+Например перейдя в папку `scripts` набрать: `python process_video.py -v webcam -z 1080p -d gpu` для работы с видеопотоком
+с определенными параметрами
+или `python process_video.py` с параметрами по умолчанию для работы с видеопотоком  
 
 ### Использование основного конвейера библиотеки
 #### Класс Pipeline. 
